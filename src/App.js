@@ -1,59 +1,58 @@
-import {useEffect} from 'react';
+import { useEffect, useState } from 'react';
 //4cdeb3fb
 import './App.css';
 import SearchIcon from './search.svg';
+
+import MovieCard from './MovieCard';
+
 const API_URL = 'http://www.omdbapi.com/?i=tt3896198&apikey=9456966b';
 
-const movie1 ={
-    "Title": "Expelled",
-    "Year": "2014",
-    "imdbID": "tt4189442",
-    "Type": "movie",
-    "Poster": "https://m.media-amazon.com/images/M/MV5BMjI0MDY2MTIxOV5BMl5BanBnXkFtZTgwNjM4NTM0MzE@._V1_SX300.jpg"
-}
-
 const App = () => {
+    const [movies, setMovies] = useState([]); // State for storing movie data from API
+    const [searchTerm, setSearchTerm] = useState(''); // State for tracking the input value in the search bar
 
-    const searchMovies = async(title) => { //this searchMovies function is going to accepts a search title as asynchronized data
+    const searchMovies = async (title) => { 
+        // this searchMovies function is going to accept a search title as asynchronous data
         const response = await fetch(`${API_URL}&s=${title}`); // this line calls our API
         const data = await response.json();
 
-        console.log(data.Search);//we can use.search to only show titles since in line 9 we are using title to search
-    }
+        setMovies(data.Search); // Update the movies state with the search results
+    };
 
-    useEffect(()=>{
-        searchMovies('Expelled');
+    useEffect(() => {
+        searchMovies('Spiderman'); // Perform an initial search when the app loads
+    }, []);
 
-    },[]);
-
-    return(
-        <div className='app'>
-            <h1>Movieflix</h1>
+    return (
+        <div className="app">
+            <h1>MovieLand</h1>
 
             <div className="search">
                 <input
-                placeholder='Enter Movie'
-                value=''
-                onChange={() => {}}
+                    value={searchTerm} // Bind the input value to searchTerm state
+                    onChange={(e) => setSearchTerm(e.target.value)} // Update the searchTerm state on user input
+                    placeholder="Search for movies"
                 />
                 <img
-                src={SearchIcon}
-                alt="search"
-                onClick={() => {}}
+                    src={SearchIcon}
+                    alt="search"
+                    onClick={() => searchMovies(searchTerm)} // Trigger a search with the current searchTerm
                 />
             </div>
-            <div className="container">
-                <div className="movie">
-                    <div>
-                        <p>{movie1.Year}</p>
-                    </div>
-                    <div>
-                        <img src={movie1.Poster} alt={movie1.Title}/>
-                    </div>
-                </div>
 
-            </div>
+            {movies?.length > 0 ? ( // Check if there are movies in the state
+                <div className="container">
+                    {movies.map((movie) => (
+                        <MovieCard key={movie.imdbID} movie={movie} /> // Render each movie as a MovieCard component
+                    ))}
+                </div>
+            ) : (
+                <div className="empty">
+                    <h2>No movies found</h2>
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
+
 export default App;
